@@ -22,9 +22,7 @@ let robots = {};
 let target = {};
 let walls = [];
 let possibleMoves = [];
-function generatePuzzle() {
-  const gridSize = 16;
-  const walls = [];
+
 
   function isWallBetween(x1, y1, x2, y2) {
   return isWallBetween(w => {
@@ -34,8 +32,11 @@ function generatePuzzle() {
   });
 }
 
+function generatePuzzle() {
+  const gridSize = 16;
+  const walls = [];
 
-  // Outer walls
+  // === 1. 외벽 ===
   for (let i = 0; i < gridSize; i++) {
     walls.push([[i, 0], [i + 1, 0]]);
     walls.push([[i, gridSize], [i + 1, gridSize]]);
@@ -43,7 +44,7 @@ function generatePuzzle() {
     walls.push([[gridSize, i], [gridSize, i + 1]]);
   }
 
-  // Central 2x2 box
+  // === 2. 중앙 2x2 박스 ===
   const cx = 7, cy = 7;
   walls.push([[cx, cy], [cx + 1, cy]]);
   walls.push([[cx + 1, cy], [cx + 2, cy]]);
@@ -54,54 +55,72 @@ function generatePuzzle() {
   walls.push([[cx + 2, cy], [cx + 2, cy + 1]]);
   walls.push([[cx + 2, cy + 1], [cx + 2, cy + 2]]);
 
-  // 1-cell internal walls
-  const oneWalls = [[0,2],[0,5],[15,3],[15,6],[0,10],[0,13],[15,11],[15,14]];
+  // === 3. 1칸짜리 내부 벽 (8개) ===
+  const oneWalls = [
+    [0, 2], [0, 5], [15, 3], [15, 6],
+    [0, 10], [0, 13], [15, 11], [15, 14]
+  ];
   oneWalls.forEach(([x, y]) => {
-    const dir = x === 0 ? [1, 0] : [-1, 0];
-    walls.push([[x, y], [x + dir[0], y + dir[1]]]);
+    const dx = x === 0 ? 1 : -1;
+    walls.push([[x, y], [x + dx, y]]);
   });
 
-  // L-shaped walls (2-cell)
+  // === 4. ㄱ자 벽 (16개, 4개 * 4쿼드런트) ===
   const l_shapes = [];
   const used = new Set();
-  while (l_shapes.length < 4) {
-    const qx = [2, 11][Math.floor(Math.random() * 2)];
-    const qy = [2, 11][Math.floor(Math.random() * 2)];
-    const key = `${qx >> 3},${qy >> 3}`;
-    if (used.has(key)) continue;
-    used.add(key);
-    const l = [[[qx, qy], [qx + 1, qy]], [[qx + 1, qy], [qx + 1, qy + 1]]];
-    walls.push(...l);
-    l_shapes.push(l);
+
+  function addL(x, y, key) {
+    const wall1 = [[x, y], [x + 1, y]];
+    const wall2 = [[x + 1, y], [x + 1, y + 1]];
+    const overlap = l_shapes.some(w => JSON.stringify(w).includes(JSON.stringify(wall1)) || JSON.stringify(w).includes(JSON.stringify(wall2)));
+    if (used.has(`${x},${y},${key}`) || overlap) return false;
+    l_shapes.push([wall1, wall2]);
+    used.add(`${x},${y},${key}`);
+    walls.push(wall1, wall2);
+    return true;
   }
 
-  // Avoid wall/corner overlap
-  const occupied = new Set(walls.flat().map(p => `${p[0]},${p[1]}`));
+  [[0,0],[8,0],[0,8],[8,8]].forEach(([qx,qy]) => {
+    let count = 0, tries = 0;
+    while (count < 4 && tries < 100) {
+      const x = qx + 1 + Math.floor(Math.random() * 5);
+      const y = qy + 1 + Math.floor(Math.random() * 5);
+      if (addL(x, y, `${qx},${qy}`)) count++;
+      tries++;
+    }
+  });
+
+  // === 5. 로봇 ===
+  const occupied = new Set();
+  walls.flat().forEach(([x, y]) => occupied.add(`${x},${y}`));
+  for (let x = 7; x <= 8; x++) for (let y = 7; y <= 8; y++) occupied.add(`${x},${y}`);
+
   const robots = {};
   const colors = ["red", "blue", "green", "yellow"];
   function randPos() {
     while (true) {
       const x = Math.floor(Math.random() * 16);
       const y = Math.floor(Math.random() * 16);
-      if (x >= 7 && x <= 8 && y >= 7 && y <= 8) continue; // center
-      if (occupied.has(`${x},${y}`)) continue;
-      occupied.add(`${x},${y}`);
-      return { x, y };
+      const key = `${x},${y}`;
+      if (!occupied.has(key)) {
+        occupied.add(key);
+        return { x, y };
+      }
     }
   }
-  colors.forEach(c => {
-    robots[c] = randPos();
-  });
+  colors.forEach(c => robots[c] = randPos());
 
-  const [tx, ty] = l_shapes[0][1][1];
+  // === 6. 목표 지점: ㄱ자 벽의 내부 한 칸에 놓이게 ===
+  const [_, [lx, ly]] = l_shapes[Math.floor(Math.random() * l_shapes.length)];
   const target = {
-    color: colors[Math.floor(Math.random() * 4)],
-    x: tx,
-    y: ty
+    color: colors[Math.floor(Math.random() * colors.length)],
+    x: lx,
+    y: ly + 1
   };
 
   return { walls, robots, target };
 }
+
 
 // === 그리기 ===
 function drawBoard() {
