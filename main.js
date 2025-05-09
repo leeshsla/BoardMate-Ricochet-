@@ -1,15 +1,16 @@
-// Firebase 초기화
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyA1zNzJ3bIjW3RWUjtIfGMzq_DTyAlbb5U",
+  authDomain: "ricochet-2206d.firebaseapp.com",
+  databaseURL: "https://ricochet-2206d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "ricochet-2206d",
+  storageBucket: "ricochet-2206d.firebasestorage.app",
+  messagingSenderId: "939751232472",
+  appId: "1:939751232472:web:bc666402e20c35627e98ad"
 };
+
 firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
+const db = firebase.database();
+
 
 // 게임 설정
 const canvas = document.getElementById('gameCanvas');
