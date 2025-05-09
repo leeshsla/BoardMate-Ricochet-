@@ -84,3 +84,20 @@ canvas.addEventListener('click', (event) => {
 
 // 게임 시작
 initGame();
+
+function saveRecord(puzzleId, moves) {
+  const ref = db.ref('records').push();
+  ref.set({
+    puzzleId: puzzleId,
+    moves: moves,
+    date: new Date().toISOString()
+  });
+}
+
+function checkClear() {
+  if (selectedRobot.x === target.x && selectedRobot.y === target.y) {
+    alert(`Clear! 총 ${moveCount}회 만에 성공했습니다.`);
+    saveRecord(currentPuzzleId, moveCount);  // 여기에 기록 저장
+  }
+}
+
