@@ -5,10 +5,13 @@
   <title>리코셰 로봇 게임</title>
   <style>
     canvas {
-      border: 1px solid #000;
+      border: 2px solid #000;
+      display: block;
+      margin: 20px auto;
     }
     #info {
-      margin-top: 10px;
+      text-align: center;
+      font-family: sans-serif;
     }
   </style>
 </head>
@@ -16,15 +19,13 @@
   <canvas id="gameCanvas" width="640" height="640"></canvas>
   <div id="info">
     <p id="moveCount">이동 횟수: 0</p>
-    <p id="message"></p>
   </div>
 
-  <!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+  <!-- ✅ Firebase SDK 추가 (반드시 main.js보다 먼저!) -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 
-
-  <!-- 게임 로직 -->
+  <!-- ✅ 게임 로직 -->
   <script src="main.js"></script>
 </body>
 </html>
