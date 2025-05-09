@@ -26,6 +26,15 @@ function generatePuzzle() {
   const gridSize = 16;
   const walls = [];
 
+  function isWallBetween(x1, y1, x2, y2) {
+  return isWallBetween(w => {
+    const [[ax, ay], [bx, by]] = w;
+    return (ax === x1 && ay === y1 && bx === x2 && by === y2) ||
+           (ax === x2 && ay === y2 && bx === x1 && by === y1);
+  });
+}
+
+
   // Outer walls
   for (let i = 0; i < gridSize; i++) {
     walls.push([[i, 0], [i + 1, 0]]);
@@ -168,7 +177,7 @@ function getAllMoves(robot) {
 
       if (nx < 0 || nx >= gridSize || ny < 0 || ny >= gridSize) break;
       if (Object.values(robots).some(r => r.x === nx && r.y === ny)) break;
-      if (walls.some(w =>
+      if (isWallBetween(w =>
         (w[0][0] === x && w[0][1] === y && w[1][0] === nx && w[1][1] === ny) ||
         (w[1][0] === x && w[1][1] === y && w[0][0] === nx && w[0][1] === ny)
       )) break;
@@ -181,6 +190,7 @@ function getAllMoves(robot) {
       moves.push({ x, y });
     }
   }
+if (isWallBetween(x, y, nx, ny)) break;
 
   return moves;
 }
