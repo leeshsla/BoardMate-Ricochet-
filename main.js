@@ -181,7 +181,11 @@ ctx.beginPath();
 ctx.arc((target.x + 0.5) * cellSize, (target.y + 0.5) * cellSize, cellSize * 0.3, 0, 2 * Math.PI);
 ctx.fill();
 ctx.fillStyle = "white";
+ctx.font = "20px Arial";
+ctx.textAlign = "center";
+ctx.textBaseline = "middle";
 ctx.fillText("★", (target.x + 0.5) * cellSize, (target.y + 0.5) * cellSize);
+
 
 
   for (let color in robots) {
