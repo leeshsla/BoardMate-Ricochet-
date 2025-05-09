@@ -137,13 +137,5 @@ canvas.addEventListener("click", (e) => {
   }
 });
 
-// 키보드 방향키로 이동
-document.addEventListener("keydown", (e) => {
-  if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
-    const dir = e.key.replace("Arrow", "").toLowerCase();
-    moveToDirection(dir);
-  }
-});
-
 // 시작
 window.onload = initGame;
