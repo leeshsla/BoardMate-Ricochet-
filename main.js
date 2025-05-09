@@ -23,20 +23,19 @@ let target = {};
 let walls = [];
 let possibleMoves = [];
 
-
-  function isWallBetween(x1, y1, x2, y2) {
-  return isWallBetween(w => {
+// === 벽 충돌 검사 ===
+function isWallBetween(x1, y1, x2, y2) {
+  return walls.some(w => {
     const [[ax, ay], [bx, by]] = w;
     return (ax === x1 && ay === y1 && bx === x2 && by === y2) ||
            (ax === x2 && ay === y2 && bx === x1 && by === y1);
   });
 }
 
+// === 퍼즐 생성 ===
 function generatePuzzle() {
-  const gridSize = 16;
   const walls = [];
 
-  // === 1. 외벽 ===
   for (let i = 0; i < gridSize; i++) {
     walls.push([[i, 0], [i + 1, 0]]);
     walls.push([[i, gridSize], [i + 1, gridSize]]);
@@ -44,7 +43,6 @@ function generatePuzzle() {
     walls.push([[gridSize, i], [gridSize, i + 1]]);
   }
 
-  // === 2. 중앙 2x2 박스 ===
   const cx = 7, cy = 7;
   walls.push([[cx, cy], [cx + 1, cy]]);
   walls.push([[cx + 1, cy], [cx + 2, cy]]);
@@ -55,7 +53,6 @@ function generatePuzzle() {
   walls.push([[cx + 2, cy], [cx + 2, cy + 1]]);
   walls.push([[cx + 2, cy + 1], [cx + 2, cy + 2]]);
 
-  // === 3. 1칸짜리 내부 벽 (8개) ===
   const oneWalls = [
     [0, 2], [0, 5], [15, 3], [15, 6],
     [0, 10], [0, 13], [15, 11], [15, 14]
@@ -65,7 +62,6 @@ function generatePuzzle() {
     walls.push([[x, y], [x + dx, y]]);
   });
 
-  // === 4. ㄱ자 벽 (16개, 4개 * 4쿼드런트) ===
   const l_shapes = [];
   const used = new Set();
 
@@ -90,7 +86,6 @@ function generatePuzzle() {
     }
   });
 
-  // === 5. 로봇 ===
   const occupied = new Set();
   walls.flat().forEach(([x, y]) => occupied.add(`${x},${y}`));
   for (let x = 7; x <= 8; x++) for (let y = 7; y <= 8; y++) occupied.add(`${x},${y}`);
@@ -110,7 +105,6 @@ function generatePuzzle() {
   }
   colors.forEach(c => robots[c] = randPos());
 
-  // === 6. 목표 지점: ㄱ자 벽의 내부 한 칸에 놓이게 ===
   const [_, [lx, ly]] = l_shapes[Math.floor(Math.random() * l_shapes.length)];
   const target = {
     color: colors[Math.floor(Math.random() * colors.length)],
@@ -121,8 +115,7 @@ function generatePuzzle() {
   return { walls, robots, target };
 }
 
-
-// === 그리기 ===
+// === 보드 그리기 ===
 function drawBoard() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.strokeStyle = "#ccc";
@@ -131,18 +124,15 @@ function drawBoard() {
     ctx.moveTo(i * cellSize, 0);
     ctx.lineTo(i * cellSize, canvas.height);
     ctx.stroke();
-
     ctx.beginPath();
     ctx.moveTo(0, i * cellSize);
     ctx.lineTo(canvas.width, i * cellSize);
     ctx.stroke();
   }
 
-  // 중앙 2x2 검정 타일
   ctx.fillStyle = "black";
   ctx.fillRect((gridSize / 2 - 1) * cellSize, (gridSize / 2 - 1) * cellSize, cellSize * 2, cellSize * 2);
 
-  // 벽
   ctx.strokeStyle = "black";
   ctx.lineWidth = 2;
   for (let wall of walls) {
@@ -154,13 +144,11 @@ function drawBoard() {
   }
   ctx.lineWidth = 1;
 
-  // 가능한 이동 위치 표시
   for (let move of possibleMoves) {
     ctx.fillStyle = "rgba(0, 255, 0, 0.2)";
     ctx.fillRect(move.x * cellSize, move.y * cellSize, cellSize, cellSize);
   }
 
-  // 목표
   ctx.fillStyle = target.color;
   ctx.beginPath();
   ctx.arc((target.x + 0.5) * cellSize, (target.y + 0.5) * cellSize, cellSize * 0.3, 0, 2 * Math.PI);
@@ -171,7 +159,6 @@ function drawBoard() {
   ctx.textBaseline = "middle";
   ctx.fillText("★", (target.x + 0.5) * cellSize, (target.y + 0.5) * cellSize);
 
-  // 로봇
   for (let color in robots) {
     const r = robots[color];
     ctx.fillStyle = color;
@@ -183,7 +170,7 @@ function drawBoard() {
   document.getElementById("moveCount").textContent = `이동 횟수: ${moveCount}`;
 }
 
-// === 이동 가능한 위치 계산 ===
+// === 이동 계산 ===
 function getAllMoves(robot) {
   const directions = ["up", "down", "left", "right"];
   let moves = [];
@@ -193,24 +180,16 @@ function getAllMoves(robot) {
     while (true) {
       let nx = x + (dir === "right" ? 1 : dir === "left" ? -1 : 0);
       let ny = y + (dir === "down" ? 1 : dir === "up" ? -1 : 0);
-
       if (nx < 0 || nx >= gridSize || ny < 0 || ny >= gridSize) break;
       if (Object.values(robots).some(r => r.x === nx && r.y === ny)) break;
-      if (isWallBetween(w =>
-        (w[0][0] === x && w[0][1] === y && w[1][0] === nx && w[1][1] === ny) ||
-        (w[1][0] === x && w[1][1] === y && w[0][0] === nx && w[0][1] === ny)
-      )) break;
-
+      if (isWallBetween(x, y, nx, ny)) break;
       x = nx;
       y = ny;
     }
-
     if (x !== robot.x || y !== robot.y) {
       moves.push({ x, y });
     }
   }
-if (isWallBetween(x, y, nx, ny)) break;
-
   return moves;
 }
 
@@ -245,7 +224,7 @@ canvas.addEventListener("click", (e) => {
   drawBoard();
 });
 
-// === 클리어 확인 ===
+// === 성공 판정 ===
 function checkClear() {
   if (robots[target.color].x === target.x && robots[target.color].y === target.y) {
     alert(`Clear! 총 ${moveCount}회 만에 성공했습니다.`);
@@ -263,7 +242,7 @@ function saveRecord(moves) {
 
 // === 초기화 ===
 function initGame() {
-  const data = generatePuzzle(); // ← 랜덤 퍼즐 생성
+  const data = generatePuzzle();
   walls = data.walls;
   robots = data.robots;
   target = data.target;
@@ -272,6 +251,5 @@ function initGame() {
   possibleMoves = [];
   drawBoard();
 }
-
 
 window.onload = initGame;
