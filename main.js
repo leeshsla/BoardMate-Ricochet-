@@ -22,6 +22,77 @@ let robots = {};
 let target = {};
 let walls = [];
 let possibleMoves = [];
+function generatePuzzle() {
+  const gridSize = 16;
+  const walls = [];
+
+  // Outer walls
+  for (let i = 0; i < gridSize; i++) {
+    walls.push([[i, 0], [i + 1, 0]]);
+    walls.push([[i, gridSize], [i + 1, gridSize]]);
+    walls.push([[0, i], [0, i + 1]]);
+    walls.push([[gridSize, i], [gridSize, i + 1]]);
+  }
+
+  // Central 2x2 box
+  const cx = 7, cy = 7;
+  walls.push([[cx, cy], [cx + 1, cy]]);
+  walls.push([[cx + 1, cy], [cx + 2, cy]]);
+  walls.push([[cx, cy + 2], [cx + 1, cy + 2]]);
+  walls.push([[cx + 1, cy + 2], [cx + 2, cy + 2]]);
+  walls.push([[cx, cy], [cx, cy + 1]]);
+  walls.push([[cx, cy + 1], [cx, cy + 2]]);
+  walls.push([[cx + 2, cy], [cx + 2, cy + 1]]);
+  walls.push([[cx + 2, cy + 1], [cx + 2, cy + 2]]);
+
+  // 1-cell internal walls
+  const oneWalls = [[0,2],[0,5],[15,3],[15,6],[0,10],[0,13],[15,11],[15,14]];
+  oneWalls.forEach(([x, y]) => {
+    const dir = x === 0 ? [1, 0] : [-1, 0];
+    walls.push([[x, y], [x + dir[0], y + dir[1]]]);
+  });
+
+  // L-shaped walls (2-cell)
+  const l_shapes = [];
+  const used = new Set();
+  while (l_shapes.length < 4) {
+    const qx = [2, 11][Math.floor(Math.random() * 2)];
+    const qy = [2, 11][Math.floor(Math.random() * 2)];
+    const key = `${qx >> 3},${qy >> 3}`;
+    if (used.has(key)) continue;
+    used.add(key);
+    const l = [[[qx, qy], [qx + 1, qy]], [[qx + 1, qy], [qx + 1, qy + 1]]];
+    walls.push(...l);
+    l_shapes.push(l);
+  }
+
+  // Avoid wall/corner overlap
+  const occupied = new Set(walls.flat().map(p => `${p[0]},${p[1]}`));
+  const robots = {};
+  const colors = ["red", "blue", "green", "yellow"];
+  function randPos() {
+    while (true) {
+      const x = Math.floor(Math.random() * 16);
+      const y = Math.floor(Math.random() * 16);
+      if (x >= 7 && x <= 8 && y >= 7 && y <= 8) continue; // center
+      if (occupied.has(`${x},${y}`)) continue;
+      occupied.add(`${x},${y}`);
+      return { x, y };
+    }
+  }
+  colors.forEach(c => {
+    robots[c] = randPos();
+  });
+
+  const [tx, ty] = l_shapes[0][1][1];
+  const target = {
+    color: colors[Math.floor(Math.random() * 4)],
+    x: tx,
+    y: ty
+  };
+
+  return { walls, robots, target };
+}
 
 // === 그리기 ===
 function drawBoard() {
@@ -163,17 +234,15 @@ function saveRecord(moves) {
 
 // === 초기화 ===
 function initGame() {
-  fetch("gameData.json")
-    .then(res => res.json())
-    .then(data => {
-      walls = data.walls;
-      robots = data.robots;
-      target = data.target;
-      moveCount = 0;
-      selectedRobot = null;
-      possibleMoves = [];
-      drawBoard();
-    });
+  const data = generatePuzzle(); // ← 랜덤 퍼즐 생성
+  walls = data.walls;
+  robots = data.robots;
+  target = data.target;
+  moveCount = 0;
+  selectedRobot = null;
+  possibleMoves = [];
+  drawBoard();
 }
+
 
 window.onload = initGame;
