@@ -141,6 +141,7 @@ function generatePuzzle() {
 }
 
 
+
 // === 보드 그리기 ===
 function drawBoard() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -174,16 +175,14 @@ function drawBoard() {
     ctx.fillStyle = "rgba(0, 255, 0, 0.2)";
     ctx.fillRect(move.x * cellSize, move.y * cellSize, cellSize, cellSize);
   }
+// 목표 표시
+ctx.fillStyle = target.color;
+ctx.beginPath();
+ctx.arc((target.x + 0.5) * cellSize, (target.y + 0.5) * cellSize, cellSize * 0.3, 0, 2 * Math.PI);
+ctx.fill();
+ctx.fillStyle = "white";
+ctx.fillText("★", (target.x + 0.5) * cellSize, (target.y + 0.5) * cellSize);
 
-  ctx.fillStyle = target.color;
-  ctx.beginPath();
-  ctx.arc((target.x + 0.5) * cellSize, (target.y + 0.5) * cellSize, cellSize * 0.3, 0, 2 * Math.PI);
-  ctx.fill();
-  ctx.fillStyle = "white";
-  ctx.font = "20px Arial";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("★", (target.x + 0.5) * cellSize, (target.y + 0.5) * cellSize);
 
   for (let color in robots) {
     const r = robots[color];
