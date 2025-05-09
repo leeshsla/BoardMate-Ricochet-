@@ -105,11 +105,17 @@ function checkClear() {
 }
 
 function saveRecord(moves) {
+  console.log("🔥 저장 시도됨:", moves);
   db.ref('records').push({
     date: new Date().toISOString(),
     moves: moves
+  }).then(() => {
+    console.log("✅ 저장 성공!");
+  }).catch((err) => {
+    console.error("❌ 저장 실패:", err);
   });
 }
+
 
 // === 초기화 ===
 function initGame() {
