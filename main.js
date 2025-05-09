@@ -128,6 +128,7 @@ function initGame() {
       moveCount = 0;
       selectedRobot = null;
       drawBoard();
+      console.log("📦 로딩된 벽 데이터:", data.walls);
     });
 }
 
