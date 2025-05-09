@@ -1,16 +1,29 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <title>리코셰 로봇</title>
+  <meta charset="UTF-8">
+  <title>리코셰 로봇 게임</title>
+  <style>
+    canvas {
+      border: 1px solid #000;
+    }
+    #info {
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
-    <h1>리코셰 로봇 게임</h1>
+  <canvas id="gameCanvas" width="640" height="640"></canvas>
+  <div id="info">
+    <p id="moveCount">이동 횟수: 0</p>
+    <p id="message"></p>
+  </div>
 
-    <!-- 🟦 여기 게임 보드 들어감 -->
-    <canvas id="board" width="640" height="640" style="border: 1px solid #000;"></canvas>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 
-    <!-- 🔧 게임 로직 연결 -->
-    <script src="main.js"></script>
+  <!-- 게임 로직 -->
+  <script src="main.js"></script>
 </body>
 </html>
